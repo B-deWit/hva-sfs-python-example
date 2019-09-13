@@ -31,63 +31,28 @@ def main():
     #print(ns_api.get_departures("8400057"))
 
 
-    list_disruptions = ns_api.get_disruptions()
     list_train_stations = ns_api.get_train_stations()
 
     delay_total = 0
+    delay_current_station = 0
 
     for station in list_train_stations:
         station_id = station['id']
-        print(station_id)
+        station_name = station['name']
 
         list_departures = ns_api.get_departures(station_id)
 
         for departures in list_departures :
             delay = departures['delay_seconds']
+            delay_current_station += delay
             delay_total += delay
+            
+        print('delay at', station_name, 'is',delay_current_station)            
+        delay_current_station = 0 
 
-
-    print("de totale delay van alle treinen met vertraging op alle stations opgeteld is ", delay_total)
-    
-    
-    list_departures_from_AmsterdamCS = ns_api.get_departures("8400058") #id van amsterdam centraal 
-    delay_total = 0
-
-    for departures in list_departures_from_AmsterdamCS:
-        
-        delay = departures['delay_seconds']
-        delay_total += delay 
-
-    print("de totale delay op amsterdam centraal station", delay_total)   
-
-
-
-    impact_buffer = 0 
-    stations_size = 0
-
-    for disruptions in list_disruptions:
-
-       impact = disruptions['impact']
-       stations = disruptions['stations']
-
-#this sadly only works when there is only one instance of the highest impact nr 
-#if there are several highest impact numbers then it will settle on the first it encounters 
-       if len(stations) > stations_size:
-           stations_size = len(stations)
-
-       if impact > int(impact_buffer):
-           impact_buffer = impact
-           station_buffer = stations
-
-
-       #print(impact)
-       #print(stations, len(stations))
-       
-         
-
-    print("\rthe highest impact nr. : ", impact_buffer )
-    print("\r these stations were impacted by this disruption :", station_buffer)
-    print("\r the most stations affected by a single disruption :", stations_size)
+    print("\n\r de totale delay van alle treinen met vertraging op alle stations opgeteld is ", delay_total)
+    print('dat is', delay_total/3600, 'uur')
+    print('het minimumloon in Nederland is 14,40 per uur  (in 2016), dus dat is', (delay_total/3600)*14.4 ,'Euro verspild aan wachten op de trein') 
 
 if __name__ == "__main__":
     main()
